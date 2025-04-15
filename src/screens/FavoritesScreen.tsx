@@ -81,16 +81,14 @@ const FavoritesScreen = () => {
                     style={styles.actionButton}
                     onPress={() => handleRemoveFavorite(wallpaper.id)}
                 >
-                    <FontAwesome5 name="heart" size={16} color="#fff" />
+                    <FontAwesome5 
+                        name="heart" 
+                        size={16} 
+                        color="#ff4444" 
+                        solid={true}
+                    />
                 </TouchableOpacity>
-                <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={() => {
-                        console.log('Beğenildi:', wallpaper.id);
-                    }}
-                >
-                    <FontAwesome5 name="thumbs-up" size={16} color="#fff" />
-                </TouchableOpacity>
+
             </View>
             <View style={styles.itemOverlay}>
                 <Text style={styles.itemTitle}>{wallpaper.title}</Text>
@@ -256,6 +254,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         padding: 15,
+        paddingBottom: 100,
     },
     scrollContent: {
         flex: 1,
@@ -354,6 +353,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+
 });
 
 export default FavoritesScreen;      

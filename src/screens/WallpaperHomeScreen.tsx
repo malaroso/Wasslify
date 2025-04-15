@@ -5,7 +5,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../types/NavigationTypes';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { getAllWallpapers } from '../services/wallpaperService';
+import { getAllWallpapers, likeWallpaper, unlikeWallpaper } from '../services/wallpaperService';
 import { addFavorite, removeFavorite } from '../services/favoriteService';
 import { Wallpaper, WallpaperResponse } from '../types/WallpaperTypes';
 import LottieView from 'lottie-react-native';
@@ -53,39 +53,67 @@ const WallpaperHomeScreen = () => {
         fetchWallpapers();
     }, [page]);
 
-    const handleFavoritePress = async (wallpaperId: number, isFavorited: number) => {
+    const handleFavoritePress = async (wallpaper: Wallpaper) => {
         try {
-            if (isFavorited === 1) {
+            if (wallpaper.is_favorited === 1) {
                 // Favorilerden kaldır
-                const response = await removeFavorite(wallpaperId);
+                const response = await removeFavorite(wallpaper.id);
                 if (response.status) {
                     // Duvar kağıtlarını güncelle
-                    setWallpapers(prev => prev.map(wallpaper => 
-                        wallpaper.id === wallpaperId 
-                            ? { ...wallpaper, is_favorited: 0 }
-                            : wallpaper
+                    setWallpapers(prev => prev.map(w => 
+                        w.id === wallpaper.id 
+                            ? { ...w, is_favorited: 0 }
+                            : w
                     ));
-                    Alert.alert('Başarılı', response.message);
+                    //Alert.alert('Başarılı', response.message);
                 } else {
-                    Alert.alert('Hata', response.message);
+                    //Alert.alert('Hata', response.message);
                 }
             } else {
                 // Favorilere ekle
-                const response = await addFavorite(wallpaperId);
+                const response = await addFavorite(wallpaper.id);
                 if (response.status) {
                     // Duvar kağıtlarını güncelle
-                    setWallpapers(prev => prev.map(wallpaper => 
-                        wallpaper.id === wallpaperId 
-                            ? { ...wallpaper, is_favorited: 1 }
-                            : wallpaper
+                    setWallpapers(prev => prev.map(w => 
+                        w.id === wallpaper.id 
+                            ? { ...w, is_favorited: 1 }
+                            : w
                     ));
-                    Alert.alert('Başarılı', response.message);
+                    //Alert.alert('Başarılı', response.message);
                 } else {
-                    Alert.alert('Hata', response.message);
+                    //Alert.alert('Hata', response.message);
                 }
             }
         } catch (error) {
             console.error('Favori işlemi sırasında hata oluştu:', error);
+            Alert.alert('Hata', 'İşlem sırasında bir hata oluştu');
+        }
+    };
+
+    const handleLikePress = async (wallpaper: Wallpaper) => {
+        try {
+            let response;
+            if (wallpaper.is_liked === 1) {
+                // Beğeniyi kaldır
+                response = await unlikeWallpaper(wallpaper.id);
+            } else {
+                // Beğen
+                response = await likeWallpaper(wallpaper.id);
+            }
+            
+            if (response.status) {
+                // Duvar kağıtlarını güncelle
+                setWallpapers(prev => prev.map(w => 
+                    w.id === wallpaper.id 
+                        ? { ...w, is_liked: wallpaper.is_liked === 1 ? 0 : 1 }
+                        : w
+                ));
+                //Alert.alert('Başarılı', response.message);
+            } else {
+                //Alert.alert('Hata', response.message);
+            }
+        } catch (error) {
+            console.error('Beğeni işlemi sırasında hata oluştu:', error);
             Alert.alert('Hata', 'İşlem sırasında bir hata oluştu');
         }
     };
@@ -103,22 +131,25 @@ const WallpaperHomeScreen = () => {
             <View style={styles.itemActions}>
                 <TouchableOpacity 
                     style={styles.actionButton}
-                    onPress={() => handleFavoritePress(wallpaper.id, wallpaper.is_favorited)}
+                    onPress={() => handleFavoritePress(wallpaper)}
                 >
                     <FontAwesome5 
                         name="heart" 
                         size={16} 
-                        color={wallpaper.is_favorited === 1 ? "#ff4444" : "#fff"} 
+                        color={wallpaper.is_favorited === 1 ? "#ff4757" : "#fff"} 
                         solid={wallpaper.is_favorited === 1}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={styles.actionButton}
-                    onPress={() => {
-                        console.log('Beğenildi:', wallpaper.id);
-                    }}
+                    onPress={() => handleLikePress(wallpaper)}
                 >
-                    <FontAwesome5 name="thumbs-up" size={16} color="#fff" />
+                    <FontAwesome5 
+                        name="thumbs-up" 
+                        size={16} 
+                        color={wallpaper.is_liked === 1 ? "#ffffff" : "#dddddd"} 
+                        solid={wallpaper.is_liked === 1}
+                    />
                 </TouchableOpacity>
             </View>
             <View style={styles.itemOverlay}>

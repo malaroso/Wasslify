@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, Animated, Dimensions, Alert } from 'react-native';
-import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, Feather, FontAwesome5 } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LottieView from 'lottie-react-native';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types/NavigationTypes';
 import BottomNavigator from '../components/BottomNavigator';
 import { getUserDetail } from '../services/userServices';
-import { getPopularWallpapers } from '../services/wallpaperService';
+import { getAllWallpapers, getPopularWallpapers, likeWallpaper, unlikeWallpaper } from '../services/wallpaperService';
 import { getAllCategories } from '../services/categoryService';
 import { addFavorite, removeFavorite, isFavorite } from '../services/favoriteService';
 import { Wallpaper } from '../types/WallpaperTypes';
@@ -28,7 +28,6 @@ const HomeScreen = () => {
     const [loadingPopular, setLoadingPopular] = useState(true);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
-    const [favoriteStates, setFavoriteStates] = useState<{ [key: number]: boolean }>({});
 
     const fetchUserDetail = async () => {
         setLoading(true);
@@ -50,16 +49,23 @@ const HomeScreen = () => {
         try {
             setLoadingPopular(true);
             const response = await getPopularWallpapers();
-            console.log('Popular Wallpapers API Response:', response);
-
             if (response.status) {
                 console.log('Popular Wallpapers Data:', response.data);
-                setPopularWallpapers(response.data);
+                if (response.data && Array.isArray(response.data)) {
+                    setPopularWallpapers(response.data);
+                } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+                    setPopularWallpapers(response.data.data);
+                } else {
+                    console.error('Invalid API response structure:', response);
+                    setPopularWallpapers([]);
+                }
             } else {
                 console.error('API Error:', response.message);
+                setPopularWallpapers([]);
             }
         } catch (error) {
             console.error('Popüler duvar kağıtları yüklenirken hata oluştu:', error);
+            setPopularWallpapers([]);
         } finally {
             setLoadingPopular(false);
         }
@@ -99,40 +105,24 @@ const HomeScreen = () => {
         setMenuOpen(!menuOpen);
     };
 
-    const checkFavoriteStatus = async (wallpaperId: number) => {
+    const handleFavoritePress = async (wallpaper: Wallpaper) => {
         try {
-            const isFav = await isFavorite(wallpaperId);
-            setFavoriteStates(prev => ({
-                ...prev,
-                [wallpaperId]: isFav
-            }));
-        } catch (error) {
-            console.error('Favori durumu kontrol edilirken hata oluştu:', error);
-        }
-    };
-
-    const handleFavoritePress = async (wallpaperId: number) => {
-        try {
-            if (favoriteStates[wallpaperId]) {
+            if (wallpaper.is_favorited === 1) {
                 // Favorilerden kaldır
-                const response = await removeFavorite(wallpaperId);
+                const response = await removeFavorite(wallpaper.id);
                 if (response.status) {
-                    setFavoriteStates(prev => ({
-                        ...prev,
-                        [wallpaperId]: false
-                    }));
+                    // UI'ı güncelle - API'yi yeniden çağırarak güncel verileri alalım
+                    fetchPopularWallpapers();
                     Alert.alert('Başarılı', response.message);
                 } else {
                     Alert.alert('Hata', response.message);
                 }
             } else {
                 // Favorilere ekle
-                const response = await addFavorite(wallpaperId);
+                const response = await addFavorite(wallpaper.id);
                 if (response.status) {
-                    setFavoriteStates(prev => ({
-                        ...prev,
-                        [wallpaperId]: true
-                    }));
+                    // UI'ı güncelle - API'yi yeniden çağırarak güncel verileri alalım
+                    fetchPopularWallpapers();
                     Alert.alert('Başarılı', response.message);
                 } else {
                     Alert.alert('Hata', response.message);
@@ -144,13 +134,29 @@ const HomeScreen = () => {
         }
     };
 
-    useEffect(() => {
-        if (popularWallpapers.length > 0) {
-            popularWallpapers.forEach(wallpaper => {
-                checkFavoriteStatus(wallpaper.id);
-            });
+    const handleLikePress = async (wallpaper: Wallpaper) => {
+        try {
+            let response;
+            if (wallpaper.is_liked === 1) {
+                // Beğeniyi kaldır
+                response = await unlikeWallpaper(wallpaper.id);
+            } else {
+                // Beğen
+                response = await likeWallpaper(wallpaper.id);
+            }
+            
+            if (response.status) {
+                // UI'ı güncelle - API'yi yeniden çağırarak güncel verileri alalım
+                fetchPopularWallpapers();
+                Alert.alert('Başarılı', response.message);
+            } else {
+                Alert.alert('Hata', response.message);
+            }
+        } catch (error) {
+            console.error('Beğeni işlemi sırasında hata oluştu:', error);
+            Alert.alert('Hata', 'İşlem sırasında bir hata oluştu');
         }
-    }, [popularWallpapers]);
+    };
 
     const renderCategoryItem = (category: Category) => (
         <TouchableOpacity 
@@ -178,21 +184,24 @@ const HomeScreen = () => {
             <View style={styles.wallpaperActions}>
                 <TouchableOpacity 
                     style={styles.actionButton}
-                    onPress={() => handleFavoritePress(wallpaper.id)}
+                    onPress={() => handleFavoritePress(wallpaper)}
                 >
                     <Ionicons 
-                        name={favoriteStates[wallpaper.id] ? "heart" : "heart-outline"} 
+                        name={wallpaper.is_favorited === 1 ? "heart" : "heart-outline"} 
                         size={24} 
-                        color={favoriteStates[wallpaper.id] ? "#ff4444" : "#fff"} 
+                        color={wallpaper.is_favorited === 1 ? "#ff4757" : "#fff"} 
                     />
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={styles.actionButton}
-                    onPress={() => {
-                        console.log('Beğenildi:', wallpaper.id);
-                    }}
+                    onPress={() => handleLikePress(wallpaper)}
                 >
-                    <Ionicons name="thumbs-up-outline" size={24} color="#fff" />
+                    <FontAwesome5 
+                        name="thumbs-up" 
+                        solid={wallpaper.is_liked === 1}
+                        size={16} 
+                        color={wallpaper.is_liked === 1 ? "#ffffff" : "#dddddd"} 
+                    />
                 </TouchableOpacity>
             </View>
             <View style={styles.wallpaperOverlay}>
