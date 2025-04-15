@@ -12,14 +12,32 @@ export const getFavorites = async (): Promise<WallpaperResponse> => {
         
         return {
             status: false,
-            data: [],
+            data: {
+                status: false,
+                data: [],
+                pagination: {
+                    current_page: 1,
+                    per_page: 10,
+                    total: 0,
+                    total_pages: 0
+                }
+            },
             message: 'Favoriler bulunamadı'
         };
     } catch (error) {
         console.error('Favoriler yüklenirken hata oluştu:', error);
         return {
             status: false,
-            data: [],
+            data: {
+                status: false,
+                data: [],
+                pagination: {
+                    current_page: 1,
+                    per_page: 10,
+                    total: 0,
+                    total_pages: 0
+                }
+            },
             message: 'Favoriler yüklenirken bir hata oluştu'
         };
     }
