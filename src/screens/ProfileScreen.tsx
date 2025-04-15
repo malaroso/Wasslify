@@ -93,7 +93,7 @@ const ProfileScreen = () => {
                             <Ionicons name="chevron-forward" size={20} color="#999" />
                         </TouchableOpacity>
                         
-                        <TouchableOpacity style={styles.button}>
+                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Payment')}>
                             <View style={styles.buttonLeft}>
                                 <FontAwesome5 name="credit-card" size={16} color="#666" style={styles.buttonIcon} />
                                 <Text style={styles.buttonText}>My Payment Methods</Text>
@@ -101,7 +101,7 @@ const ProfileScreen = () => {
                             <Ionicons name="chevron-forward" size={20} color="#999" />
                         </TouchableOpacity>
                         
-                        <TouchableOpacity style={styles.button}>
+                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Subscription')}>
                             <View style={styles.buttonLeft}>
                                 <FontAwesome5 name="crown" size={16} color="#666" style={styles.buttonIcon} />
                                 <Text style={styles.buttonText}>My Subscription</Text>
@@ -111,15 +111,8 @@ const ProfileScreen = () => {
                     </View>
 
                     <View style={styles.section}>
-                        <TouchableOpacity style={styles.button}>
-                            <View style={styles.buttonLeft}>
-                                <FontAwesome5 name="fingerprint" size={16} color="#666" style={styles.buttonIcon} />
-                                <Text style={styles.buttonText}>Biometrics</Text>
-                            </View>
-                            <Ionicons name="chevron-forward" size={20} color="#999" />
-                        </TouchableOpacity>
                         
-                        <TouchableOpacity style={styles.button}>
+                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Faq')}>
                             <View style={styles.buttonLeft}>
                                 <FontAwesome5 name="question-circle" size={16} color="#666" style={styles.buttonIcon} />
                                 <Text style={styles.buttonText}>FAQ/Support</Text>
