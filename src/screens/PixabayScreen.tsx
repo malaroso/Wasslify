@@ -167,7 +167,7 @@ const PixabayScreen = () => {
         
         try {
             const response = await fetch(
-                `https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(searchQuery)}&image_type=photo&per_page=20`,
+                `https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(searchQuery)}&image_type=photo&per_page=200`,
                 {
                     method: 'GET',
                     headers: {
@@ -206,7 +206,7 @@ const PixabayScreen = () => {
                         <View style={styles.searchContainer}>
                             <TextInput
                                 style={styles.searchInput}
-                                placeholder="Görüntü aramak için yazın..."
+                                placeholder="Search for images"
                                 placeholderTextColor="#DDDDDD"
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
@@ -216,7 +216,7 @@ const PixabayScreen = () => {
                                 style={styles.searchButton}
                                 onPress={searchImages}
                             >
-                                <Text style={styles.searchButtonText}>Ara</Text>
+                                <Text style={styles.searchButtonText}>Search</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, Animated, Dimensions, Alert } from 'react-native';
 import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LottieView from 'lottie-react-native';
@@ -7,6 +7,11 @@ import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation
 import { RootStackParamList } from '../types/NavigationTypes';
 import BottomNavigator from '../components/BottomNavigator';
 import { getUserDetail } from '../services/userServices';
+import { getPopularWallpapers } from '../services/wallpaperService';
+import { getAllCategories } from '../services/categoryService';
+import { addFavorite, removeFavorite, isFavorite } from '../services/favoriteService';
+import { Wallpaper } from '../types/WallpaperTypes';
+import { Category } from '../types/CategoryTypes';
 const { width } = Dimensions.get('window');
 const MENU_WIDTH = width * 0.75;
 import AlertComponent from '../components/AlertComponent';
@@ -19,6 +24,11 @@ const HomeScreen = () => {
     const [userDetail, setUserDetail] = React.useState<UserDetailData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [popularWallpapers, setPopularWallpapers] = useState<Wallpaper[]>([]);
+    const [loadingPopular, setLoadingPopular] = useState(true);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
+    const [favoriteStates, setFavoriteStates] = useState<{ [key: number]: boolean }>({});
 
     const fetchUserDetail = async () => {
         setLoading(true);
@@ -36,13 +46,47 @@ const HomeScreen = () => {
         }
     };
 
+    const fetchPopularWallpapers = async () => {
+        try {
+            setLoadingPopular(true);
+            const response = await getPopularWallpapers();
+            console.log('Popular Wallpapers API Response:', response);
+
+            if (response.status) {
+                console.log('Popular Wallpapers Data:', response.data);
+                setPopularWallpapers(response.data);
+            } else {
+                console.error('API Error:', response.message);
+            }
+        } catch (error) {
+            console.error('Popüler duvar kağıtları yüklenirken hata oluştu:', error);
+        } finally {
+            setLoadingPopular(false);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            setLoadingCategories(true);
+            const response = await getAllCategories();
+            if (response.status) {
+                setCategories(response.data);
+            }
+        } catch (error) {
+            console.error('Kategoriler yüklenirken hata oluştu:', error);
+        } finally {
+            setLoadingCategories(false);
+        }
+    };
+
     useFocusEffect(
         useCallback(() => {
             fetchUserDetail();
+            fetchPopularWallpapers();
+            fetchCategories();
         }, [])
     );
     
-
     const toggleMenu = () => {
         const toValue = menuOpen ? -MENU_WIDTH : 0;
         
@@ -54,25 +98,118 @@ const HomeScreen = () => {
         
         setMenuOpen(!menuOpen);
     };
-    
-    const popularWallpapers = [
-        { id: '1', image: require('../../assets/images/loginScreenOne.jpg') },
-        { id: '2', image: require('../../assets/images/loginScreenTwo.jpg') },
-        { id: '3', image: require('../../assets/images/loginScreenThree.jpg') },
-    ];
-    
-    const categories = [
-        { id: '1', name: 'Colorful', image: require('../../assets/images/Abstract.jpg') },
-        { id: '2', name: 'Auto', image: require('../../assets/images/Animals.jpg') },
-        { id: '3', name: 'Nature', image: require('../../assets/images/Cities.jpg') },
-        { id: '4', name: 'Urban', image: require('../../assets/images/Forests.jpg') },
-        { id: '5', name: 'Space', image: require('../../assets/images/Landscapes.jpg') },
-        { id: '6', name: 'Minimalist', image: require('../../assets/images/Minimalist.jpg') },
-        { id: '7', name: 'Mountains', image: require('../../assets/images/Mounth.jpg') },
-        { id: '8', name: 'Nature', image: require('../../assets/images/Nature.jpg') },
-        { id: '9', name: 'Space', image: require('../../assets/images/Space.jpg') },
-        { id: '10', name: 'Sunset', image: require('../../assets/images/sunset.jpg') },
-    ];
+
+    const checkFavoriteStatus = async (wallpaperId: number) => {
+        try {
+            const isFav = await isFavorite(wallpaperId);
+            setFavoriteStates(prev => ({
+                ...prev,
+                [wallpaperId]: isFav
+            }));
+        } catch (error) {
+            console.error('Favori durumu kontrol edilirken hata oluştu:', error);
+        }
+    };
+
+    const handleFavoritePress = async (wallpaperId: number) => {
+        try {
+            if (favoriteStates[wallpaperId]) {
+                // Favorilerden kaldır
+                const response = await removeFavorite(wallpaperId);
+                if (response.status) {
+                    setFavoriteStates(prev => ({
+                        ...prev,
+                        [wallpaperId]: false
+                    }));
+                    Alert.alert('Başarılı', response.message);
+                } else {
+                    Alert.alert('Hata', response.message);
+                }
+            } else {
+                // Favorilere ekle
+                const response = await addFavorite(wallpaperId);
+                if (response.status) {
+                    setFavoriteStates(prev => ({
+                        ...prev,
+                        [wallpaperId]: true
+                    }));
+                    Alert.alert('Başarılı', response.message);
+                } else {
+                    Alert.alert('Hata', response.message);
+                }
+            }
+        } catch (error) {
+            console.error('Favori işlemi sırasında hata oluştu:', error);
+            Alert.alert('Hata', 'İşlem sırasında bir hata oluştu');
+        }
+    };
+
+    useEffect(() => {
+        if (popularWallpapers.length > 0) {
+            popularWallpapers.forEach(wallpaper => {
+                checkFavoriteStatus(wallpaper.id);
+            });
+        }
+    }, [popularWallpapers]);
+
+    const renderCategoryItem = (category: Category) => (
+        <TouchableOpacity 
+            key={category.id} 
+            style={styles.categoryItem}
+            onPress={() => navigation.navigate('CategoryDetail', { categoryId: category.id })}
+        >
+            <Image source={{ uri: category.icon }} style={styles.categoryImage} />
+            <View style={styles.categoryOverlay}>
+                <Text style={styles.categoryName}>{category.name}</Text>
+            </View>
+        </TouchableOpacity>
+    );
+
+    const renderPopularWallpaper = (wallpaper: Wallpaper) => (
+        <TouchableOpacity 
+            key={wallpaper.id} 
+            style={styles.wallpaperItem}
+            onPress={() => navigation.navigate('WallpaperDetail', { wallpaperId: wallpaper.id })}
+        >
+            <Image 
+                source={{ uri: wallpaper.image_url }} 
+                style={styles.wallpaperImage} 
+            />
+            <View style={styles.wallpaperActions}>
+                <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => handleFavoritePress(wallpaper.id)}
+                >
+                    <Ionicons 
+                        name={favoriteStates[wallpaper.id] ? "heart" : "heart-outline"} 
+                        size={24} 
+                        color={favoriteStates[wallpaper.id] ? "#ff4444" : "#fff"} 
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => {
+                        console.log('Beğenildi:', wallpaper.id);
+                    }}
+                >
+                    <Ionicons name="thumbs-up-outline" size={24} color="#fff" />
+                </TouchableOpacity>
+            </View>
+            <View style={styles.wallpaperOverlay}>
+                <Text style={styles.wallpaperTitle}>{wallpaper.title}</Text>
+                <View style={styles.wallpaperStats}>
+                    <View style={styles.statItem}>
+                        <Ionicons name="eye" size={12} color="#fff" />
+                        <Text style={styles.statText}>{wallpaper.views}</Text>
+                    </View>
+                    <View style={styles.statItem}>
+                        <Ionicons name="download" size={12} color="#fff" />
+                        <Text style={styles.statText}>{wallpaper.downloads}</Text>
+                    </View>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
 
     return (
         <SafeAreaView style={styles.container}>
@@ -83,7 +220,7 @@ const HomeScreen = () => {
             ]}>
                 <ScrollView style={styles.menuItems}>
                     {/* Premium Subscription */}
-                    <TouchableOpacity style={styles.premiumContainer} onPress={() => navigation.navigate('Premium')}>
+                    <TouchableOpacity style={styles.premiumContainer} onPress={() => navigation.navigate('Subscription')}>
                         <LottieView 
                             source={require('../../assets/animations/getPremium.json')} 
                             autoPlay 
@@ -96,10 +233,26 @@ const HomeScreen = () => {
                     <View style={styles.divider} />
                     {/* Categories */}
                     <View style={styles.categorySection}>
-                        <Text style={styles.categoryTitle}>Wallpapers</Text>
-                        {categories.map((category) => (
-                            <TouchableOpacity key={category.id} style={styles.menuItem}>
-                                <Image source={category.image} style={styles.menuItemImage} />
+                        <Text style={styles.categoryTitle}>Kategoriler</Text>
+                        {loadingCategories ? (
+                            <View style={styles.loadingContainer}>
+                                <LottieView
+                                    source={require('../../assets/animations/loaderanimate.json')}
+                                    autoPlay
+                                    loop
+                                    style={styles.loadingAnimation}
+                                />
+                            </View>
+                        ) : categories.map((category) => (
+                            <TouchableOpacity 
+                                key={category.id} 
+                                style={styles.menuItem}
+                                onPress={() => {
+                                    toggleMenu();
+                                    navigation.navigate('CategoryDetail', { categoryId: category.id });
+                                }}
+                            >
+                                <Image source={{ uri: category.icon }} style={styles.menuItemImage} />
                                 <Text style={styles.menuItemText}>{category.name}</Text>
                             </TouchableOpacity>
                         ))}
@@ -130,8 +283,8 @@ const HomeScreen = () => {
                             <Ionicons name="menu" size={28} color="#fff" />
                         </TouchableOpacity>
                         
-                        <Text style={styles.headerTitle}>Hello , {userDetail?.username}! </Text>
-                        <Text style={styles.headerSubtitle}>Find the high quality free wallpapers you are looking for!</Text>
+                        <Text style={styles.headerTitle}>Hello, {userDetail?.username}! </Text>
+                        <Text style={styles.headerSubtitle}>Find high-quality free wallpapers!</Text>
                     </View>
                 </View>
                 
@@ -152,19 +305,30 @@ const HomeScreen = () => {
                                 <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
                                 <TextInput 
                                     style={styles.searchInput}
-                                    placeholder="Search for free wallpaper"
+                                    placeholder="Duvar kağıdı ara"
                                     placeholderTextColor="#999"
                                 />
                             </View>
                             
-                            <Text style={styles.sectionSubtitle}>Popular now</Text>
+                            <Text style={styles.sectionSubtitle}>Popular Now</Text>
                             
                             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-                                {popularWallpapers.map((item) => (
-                                    <TouchableOpacity key={item.id} style={styles.wallpaperItem}>
-                                        <Image source={item.image} style={styles.wallpaperImage} />
-                                    </TouchableOpacity>
-                                ))}
+                                {loadingPopular ? (
+                                    <View style={styles.loadingContainer}>
+                                        <LottieView
+                                            source={require('../../assets/animations/loaderanimate.json')}
+                                            autoPlay
+                                            loop
+                                            style={styles.loadingAnimation}
+                                        />
+                                    </View>
+                                ) : popularWallpapers.length > 0 ? (
+                                    popularWallpapers.map(renderPopularWallpaper)
+                                ) : (
+                                    <View style={styles.emptyContainer}>
+                                        <Text style={styles.emptyText}>Popular wallpaper not found</Text>
+                                    </View>
+                                )}
                             </ScrollView>
                         </View>
                         
@@ -175,14 +339,16 @@ const HomeScreen = () => {
                             </View>
                             
                             <View style={styles.categoriesGrid}>
-                                {categories.map(category => (
-                                    <TouchableOpacity key={category.id} style={styles.categoryItem}>
-                                        <Image source={category.image} style={styles.categoryImage} />
-                                        <View style={styles.categoryOverlay}>
-                                            <Text style={styles.categoryName}>{category.name}</Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                ))}
+                                {loadingCategories ? (
+                                    <View style={styles.loadingContainer}>
+                                        <LottieView
+                                            source={require('../../assets/animations/loaderanimate.json')}
+                                            autoPlay
+                                            loop
+                                            style={styles.loadingAnimation}
+                                        />
+                                    </View>
+                                ) : categories.map(renderCategoryItem)}
                             </View>
                             
                             <TouchableOpacity style={styles.moreButton}>
@@ -285,7 +451,6 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat-Bold',
         marginBottom: 10,
     },
-
     categoryImage: {
         width: '100%',
         height: 100,
@@ -293,7 +458,7 @@ const styles = StyleSheet.create({
     },
     categoryOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -400,13 +565,50 @@ const styles = StyleSheet.create({
         marginRight: 15,
         borderRadius: 12,
         overflow: 'hidden',
+        position: 'relative',
     },
     wallpaperImage: {
         width: 150,
         height: 200,
         borderRadius: 12,
     },
-
+    wallpaperOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: 10,
+    },
+    wallpaperTitle: {
+        color: '#fff',
+        fontSize: 14,
+        fontFamily: 'Montserrat-Medium',
+        marginBottom: 5,
+    },
+    wallpaperStats: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    statItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    statText: {
+        color: '#fff',
+        fontSize: 12,
+        marginLeft: 5,
+    },
+    loadingContainer: {
+        width: 150,
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingAnimation: {
+        width: 100,
+        height: 100,
+    },
     moreButton: {
         alignItems: 'center',
         marginTop: 10,
@@ -436,6 +638,39 @@ const styles = StyleSheet.create({
     menuItemText: {
         fontSize: 16,
         fontFamily: 'Montserrat-Medium',
+    },
+    emptyContainer: {
+        width: 150,
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f5f5f5',
+        borderRadius: 12,
+    },
+    emptyText: {
+        color: '#666',
+        fontSize: 14,
+        fontFamily: 'Montserrat-Medium',
+        textAlign: 'center',
+        padding: 10,
+    },
+    wallpaperActions: {
+        position: 'absolute',
+        top: 10,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 10,
+        zIndex: 2,
+    },
+    actionButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
