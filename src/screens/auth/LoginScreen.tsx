@@ -76,7 +76,7 @@ const LoginScreen = () => {
                     <View style={styles.middleSection}>
                         <View style={styles.formContainer}>
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Kullanıcı Adı</Text>
+                                <Text style={styles.label}>My Username</Text>
                                 <TextInput
                                     label=""
                                     mode="flat"
@@ -96,7 +96,7 @@ const LoginScreen = () => {
                                 />
                             </View>
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Şifre</Text>
+                                <Text style={styles.label}>My Password</Text>
                                 <TextInput
                                     label=""
                                     mode="flat"
@@ -128,7 +128,7 @@ const LoginScreen = () => {
                                 {isLoading ? (
                                     <ActivityIndicator size="small" color="#fff" />
                                 ) : (
-                                    <Text style={styles.continueButtonText}>Giriş Yap</Text>
+                                    <Text style={styles.continueButtonText}>Login</Text>
                                 )}
                             </TouchableOpacity>
                         </View>

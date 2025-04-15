@@ -106,21 +106,21 @@ const ProfileUpdate = () => {
                         >
                             <FontAwesome5 name="arrow-left" size={20} color="#fff" />
                         </TouchableOpacity>
-                        <Text style={styles.headerTitle}>Profil Güncelleme</Text>
+                        <Text style={styles.headerTitle}>Profile Update</Text>
                     </View>
                 </View>
 
                 <View style={styles.contentContainer}>
                     <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                        <Text style={styles.headerText}>Profil Bilgileri</Text>
+                        <Text style={styles.headerText}>Profile Information</Text>
                         <Text style={styles.description}>
-                            Kişisel bilgilerinizi güncelleyebilirsiniz.
+                            You can update your personal information.
                         </Text>
 
                         {fetchLoading ? (
                             <View style={styles.loadingContainer}>
                                 <ActivityIndicator size="large" color="#4285F4" />
-                                <Text style={styles.loadingText}>Bilgileriniz yükleniyor...</Text>
+                                <Text style={styles.loadingText}>Loading information...</Text>
                             </View>
                         ) : (
                             <>
@@ -137,21 +137,21 @@ const ProfileUpdate = () => {
                                 )}
 
                                 <View style={styles.formContainer}>
-                                    <Text style={styles.inputLabel}>Kullanıcı Adı</Text>
+                                    <Text style={styles.inputLabel}>My Username</Text>
                                     <View style={styles.inputContainer}>
                                         <TextInput
                                             style={styles.input}
-                                            placeholder="Kullanıcı adınızı girin"
+                                            placeholder="Enter your username"
                                             value={name}
                                             onChangeText={setName}
                                         />
                                     </View>
 
-                                    <Text style={styles.inputLabel}>E-posta Adresi</Text>
+                                    <Text style={styles.inputLabel}>My Email</Text>
                                     <View style={styles.inputContainer}>
                                         <TextInput
                                             style={styles.input}
-                                            placeholder="E-posta adresinizi girin"
+                                            placeholder="Enter your email"
                                             value={email}
                                             onChangeText={setEmail}
                                             keyboardType="email-address"
@@ -167,7 +167,7 @@ const ProfileUpdate = () => {
                                         {loading ? (
                                             <ActivityIndicator color="#fff" size="small" />
                                         ) : (
-                                            <Text style={styles.updateButtonText}>Profili Güncelle</Text>
+                                            <Text style={styles.updateButtonText}>Update Profile</Text>
                                         )}
                                     </TouchableOpacity>
                                 </View>
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     updateButton: {
-        backgroundColor: '#4285F4',
+        backgroundColor: '#000',
         borderRadius: 10,
         padding: 15,
         alignItems: 'center',

@@ -27,11 +27,14 @@ const BottomNavigator = () => {
             <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
                 <Ionicons name="home" size={26} color={getIconProps('Home').color} />
             </TouchableOpacity>
+            <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('WallpaperHome')}>
+                <Ionicons name="image" size={26} color={getIconProps('WallpaperHome').color} />
+            </TouchableOpacity>
             <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Favorites')}>
                 <Ionicons name={getIconProps('Favorites').name} size={26} color={getIconProps('Favorites').color} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('PixabayScreen')}>
-                <Feather name="download" size={26} color={getIconProps('PixabayScreen').color} />
+                <Feather name="search" size={26} color={getIconProps('PixabayScreen').color} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
                 <MaterialIcons name={getIconProps('Profile').materialName} size={26} color={getIconProps('Profile').color} />

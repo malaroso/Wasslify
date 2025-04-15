@@ -84,15 +84,15 @@ const PasswordChangeScreen = () => {
                         >
                             <FontAwesome5 name="arrow-left" size={20} color="#fff" />
                         </TouchableOpacity>
-                        <Text style={styles.headerTitle}>Şifre Değiştir</Text>
+                        <Text style={styles.headerTitle}>Change Password</Text>
                     </View>
                 </View>
 
                 <View style={styles.contentContainer}>
                     <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                        <Text style={styles.headerText}>Şifre Ayarları</Text>
+                        <Text style={styles.headerText}>Password Settings</Text>
                         <Text style={styles.description}>
-                            Güvenliğiniz için şifrenizi düzenli olarak değiştirmenizi öneririz.
+                            We recommend regularly changing your password for security.
                         </Text>
 
                         {error && (
@@ -108,11 +108,11 @@ const PasswordChangeScreen = () => {
                         )}
 
                         <View style={styles.formContainer}>
-                            <Text style={styles.inputLabel}>Mevcut Şifre</Text>
+                            <Text style={styles.inputLabel}>Current Password</Text>
                             <View style={styles.inputContainer}>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Mevcut şifrenizi girin"
+                                    placeholder="Enter your current password"
                                     secureTextEntry={!showCurrentPassword}
                                     value={currentPassword}
                                     onChangeText={setCurrentPassword}
@@ -129,11 +129,11 @@ const PasswordChangeScreen = () => {
                                 </TouchableOpacity>
                             </View>
 
-                            <Text style={styles.inputLabel}>Yeni Şifre</Text>
+                            <Text style={styles.inputLabel}>New Password</Text>
                             <View style={styles.inputContainer}>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Yeni şifrenizi girin"
+                                    placeholder="Enter your new password"
                                     secureTextEntry={!showNewPassword}
                                     value={newPassword}
                                     onChangeText={setNewPassword}
@@ -150,11 +150,11 @@ const PasswordChangeScreen = () => {
                                 </TouchableOpacity>
                             </View>
 
-                            <Text style={styles.inputLabel}>Yeni Şifre (Tekrar)</Text>
+                            <Text style={styles.inputLabel}>New Password (Repeat)</Text>
                             <View style={styles.inputContainer}>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Yeni şifrenizi tekrar girin"
+                                    placeholder="Enter your new password again"
                                     secureTextEntry={!showConfirmPassword}
                                     value={confirmPassword}
                                     onChangeText={setConfirmPassword}
@@ -172,14 +172,14 @@ const PasswordChangeScreen = () => {
                             </View>
 
                             <TouchableOpacity 
-                                style={styles.updateButton}
+                                style={styles.updateButton} 
                                 onPress={handleUpdatePassword}
                                 disabled={loading}
                             >
                                 {loading ? (
                                     <ActivityIndicator color="#fff" size="small" />
                                 ) : (
-                                    <Text style={styles.updateButtonText}>Şifreyi Güncelle</Text>
+                                    <Text style={styles.updateButtonText}>Update Password</Text>
                                 )}
                             </TouchableOpacity>
                         </View>
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
         padding: 15,
     },
     updateButton: {
-        backgroundColor: '#4285F4',
+        backgroundColor: '#000',
         borderRadius: 10,
         padding: 15,
         alignItems: 'center',
