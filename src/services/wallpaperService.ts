@@ -27,7 +27,8 @@ export const getAllWallpapers = async (page: number = 1, limit: number = 10): Pr
                     total: 0,
                     total_pages: 0
                 }
-            }
+            },
+            message: 'Duvar kağıtları yüklenirken bir hata oluştu'
         };
     }
 };
@@ -52,7 +53,64 @@ export const getPopularWallpapers = async (): Promise<WallpaperResponse> => {
                     total: 0,
                     total_pages: 0
                 }
-            }
+            },
+            message: 'Popüler duvar kağıtları yüklenirken bir hata oluştu'
+        };
+    }
+};
+
+export const likeWallpaper = async (wallpaperId: number): Promise<{ status: boolean; message: string }> => {
+    try {
+        const response = await axiosInstance.post('/likeWallpaper', {
+            wallpaper_id: wallpaperId
+        });
+        
+        console.log('likeWallpaper Raw API Response:', response.data);
+        
+        if (response.data && response.data.status) {
+            return {
+                status: true,
+                message: 'Duvar kağıdı beğenildi'
+            };
+        }
+        
+        return {
+            status: false,
+            message: response.data?.message || 'Beğeni işlemi sırasında bir hata oluştu'
+        };
+    } catch (error) {
+        console.error('Beğeni işlemi sırasında hata oluştu:', error);
+        return {
+            status: false,
+            message: 'Beğeni işlemi sırasında bir hata oluştu'
+        };
+    }
+};
+
+export const unlikeWallpaper = async (wallpaperId: number): Promise<{ status: boolean; message: string }> => {
+    try {
+        const response = await axiosInstance.post('/unlikeWallpaper', {
+            wallpaper_id: wallpaperId
+        });
+        
+        console.log('unlikeWallpaper Raw API Response:', response.data);
+        
+        if (response.data && response.data.status) {
+            return {
+                status: true,
+                message: 'Duvar kağıdı beğenisi kaldırıldı'
+            };
+        }
+        
+        return {
+            status: false,
+            message: response.data?.message || 'Beğeni kaldırılırken bir hata oluştu'
+        };
+    } catch (error) {
+        console.error('Beğeni kaldırılırken hata oluştu:', error);
+        return {
+            status: false,
+            message: 'Beğeni kaldırılırken bir hata oluştu'
         };
     }
 }; 

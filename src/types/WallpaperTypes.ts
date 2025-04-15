@@ -11,6 +11,7 @@ export interface Wallpaper {
     created_at: string;
     updated_at: string;
     is_favorited: number;
+    is_liked: number;
 }
 
 export interface Pagination {
@@ -27,4 +28,5 @@ export interface WallpaperResponse {
         data: Wallpaper[];
         pagination: Pagination;
     };
+    message: string;
 } 
