@@ -16,6 +16,8 @@ import SubscriptionScreen from '../screens/profile/SubscriptionScreen';
 import PaymentScreen from '../screens/profile/PaymentScreen';
 import FaqScreen from '../screens/profile/FaqScreen';
 import WallpaperHomeScreen from '../screens/WallpaperHomeScreen';
+import CategoryDetailScreen from '../screens/CategoryDetailScreen';
+import WallpaperDetailScreen from '../screens/WallpaperDetailScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -35,6 +37,8 @@ const AppNavigation = () => {
                     <>
                         <Stack.Screen name="Home" component={HomeScreen} />
                         <Stack.Screen name="WallpaperHome" component={WallpaperHomeScreen} />
+                        <Stack.Screen name="WallpaperDetail" component={WallpaperDetailScreen} />
+                        <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
                         <Stack.Screen name="Favorites" component={FavoritesScreen} />
                         <Stack.Screen name="Profile" component={ProfileScreen} />
                         <Stack.Screen name="PasswordChange" component={PasswordChangeScreen} />
