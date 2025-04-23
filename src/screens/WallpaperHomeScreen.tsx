@@ -14,7 +14,8 @@ import {
     Switch,
     FlatList,
     Dimensions,
-    Animated
+    Animated,
+    StatusBar
 } from 'react-native';
 import BottomNavigator from '../components/BottomNavigator';
 import { NavigationProp } from '@react-navigation/native';
@@ -99,7 +100,7 @@ const WallpaperHomeScreen = () => {
         try {
             setLoading(true);
             const response = await getAllWallpapers(page);
-            console.log('API Response:', response);
+            console.log('Fetch wallpapers API Response:');
 
             if (response.status && Array.isArray(response.data)) {
                 const newWallpapers = response.data;
@@ -317,9 +318,9 @@ const WallpaperHomeScreen = () => {
         }
     };
 
-    const renderWallpaperItem = (wallpaper: Wallpaper) => (
+    const renderWallpaperItem = (wallpaper: Wallpaper, index: number) => (
         <TouchableOpacity 
-            key={wallpaper.id} 
+            key={`wallpaper-${wallpaper.id}-${index}`} 
             style={styles.item}
             onPress={() => navigation.navigate('WallpaperDetail', { wallpaperId: wallpaper.id })}
         >
@@ -327,6 +328,7 @@ const WallpaperHomeScreen = () => {
                 source={{ uri: wallpaper.image_url }}
                 style={styles.image}
             />
+
             <View style={styles.itemActions}>
                 <TouchableOpacity 
                     style={styles.actionButton}
@@ -352,23 +354,23 @@ const WallpaperHomeScreen = () => {
                 </TouchableOpacity>
             </View>
             <View style={styles.itemOverlay}>
-                <Text style={styles.itemTitle}>{wallpaper.title}</Text>
+                <Text style={styles.itemTitle} numberOfLines={1} ellipsizeMode="tail">{wallpaper.title}</Text>
                 <View style={styles.statsContainer}>
                     <View style={styles.statItem}>
                         <FontAwesome5 name="eye" size={12} color="#fff" />
-                        <Text style={styles.statText}>{wallpaper.views}</Text>
+                        <Text style={styles.statText}>{wallpaper.views || 0}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <FontAwesome5 name="thumbs-up" size={12} color="#fff" />
-                        <Text style={styles.statText}>{wallpaper.likes_count}</Text>
+                        <Text style={styles.statText}>{wallpaper.likes_count || 0}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <FontAwesome5 name="comment" size={12} color="#fff" />
-                        <Text style={styles.statText}>{wallpaper.comments_count}</Text>
+                        <Text style={styles.statText}>{wallpaper.comments_count || 0}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <FontAwesome5 name="download" size={12} color="#fff" />
-                        <Text style={styles.statText}>{wallpaper.downloads}</Text>
+                        <Text style={styles.statText}>{wallpaper.downloads || 0}</Text>
                     </View>
                 </View>
             </View>
@@ -402,16 +404,23 @@ const WallpaperHomeScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
             <View style={styles.mainContent}>
-            <View style={styles.headerBanner}>
+                <View style={styles.headerBanner}>
                     <Image 
                         source={require('../../assets/images/loginScreenTwo.jpg')} 
                         style={styles.headerImage}
                     />
-
                     <View style={styles.headerOverlay}>
-                    <Text style={styles.HeaderText}>Wallpaper</Text>
-        
+                        <TouchableOpacity 
+                            style={styles.backButton}
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Ionicons name="arrow-back" size={24} color="#fff" />
+                        </TouchableOpacity>
+                        <View style={styles.headerContent}>
+                            <Text style={styles.HeaderText}>Duvar Kağıtları</Text>
+                        </View>
                     </View>
                 </View>
                 {/* İçerik */}
@@ -456,7 +465,7 @@ const WallpaperHomeScreen = () => {
                                 showsHorizontalScrollIndicator={false}
                             >
                                 {searchQuery && (
-                                    <View style={styles.filterChip}>
+                                    <View key={`filter-search-${Date.now()}`} style={styles.filterChip}>
                                         <Text style={styles.filterChipText}>
                                             Arama: {searchQuery}
                                         </Text>
@@ -471,7 +480,7 @@ const WallpaperHomeScreen = () => {
                                 )}
                                 
                                 {selectedCategory !== null && (
-                                    <View style={styles.filterChip}>
+                                    <View key={`filter-category-${Date.now()}`} style={styles.filterChip}>
                                         <Text style={styles.filterChipText}>
                                             Kategori: {categories.find(c => c.id === selectedCategory)?.name || selectedCategory}
                                         </Text>
@@ -486,7 +495,7 @@ const WallpaperHomeScreen = () => {
                                 )}
                                 
                                 {isPremiumFilter !== null && (
-                                    <View style={styles.filterChip}>
+                                    <View key={`filter-premium-${Date.now()}`} style={styles.filterChip}>
                                         <Text style={styles.filterChipText}>
                                             {isPremiumFilter === 1 ? 'Premium' : 'Ücretsiz'}
                                         </Text>
@@ -501,7 +510,7 @@ const WallpaperHomeScreen = () => {
                                 )}
                                 
                                 {sortBy && (
-                                    <View style={styles.filterChip}>
+                                    <View key={`filter-sort-${Date.now()}`} style={styles.filterChip}>
                                         <Text style={styles.filterChipText}>
                                             Sıralama: {
                                                 sortBy === 'created_at' ? 'Tarih' : 
@@ -549,7 +558,7 @@ const WallpaperHomeScreen = () => {
                     >
                         <View style={styles.gridContainer}>
                             {Array.isArray(wallpapers) && wallpapers.length > 0 ? (
-                                wallpapers.map(renderWallpaperItem)
+                                wallpapers.map((wallpaper, index) => renderWallpaperItem(wallpaper, index))
                             ) : !loading && (
                                 <View style={styles.emptyContainer}>
                                     <LottieView
@@ -610,27 +619,38 @@ const WallpaperHomeScreen = () => {
                             
                             <View style={styles.bottomSheetHeader}>
                                 <Text style={styles.bottomSheetTitle}>Filtreler</Text>
-                                <TouchableOpacity onPress={closeBottomSheet}>
-                                    <Ionicons name="close" size={24} color="#333" />
+                                <TouchableOpacity onPress={closeBottomSheet} style={styles.closeButton}>
+                                    <Ionicons name="close" size={22} color="#fff" />
                                 </TouchableOpacity>
                             </View>
                             
-                            <ScrollView style={styles.filterScrollContent}>
+                            <ScrollView style={styles.filterScrollContent} showsVerticalScrollIndicator={false}>
                                 {/* Kategori Filtresi */}
                                 <View style={styles.filterSection}>
-                                    <Text style={styles.filterSectionTitle}>Kategori</Text>
+                                    <View style={styles.filterSectionHeader}>
+                                        <View style={styles.filterTitleContainer}>
+                                            <Ionicons name="grid-outline" size={20} color="#4285F4" />
+                                            <Text style={styles.filterSectionTitle}>Kategori</Text>
+                                        </View>
+                                    </View>
                                     <ScrollView 
                                         horizontal 
                                         showsHorizontalScrollIndicator={false}
                                         style={styles.categoriesScroll}
                                     >
                                         <TouchableOpacity
+                                            key={`category-all-${Date.now()}`}
                                             style={[
                                                 styles.categoryChip,
                                                 selectedCategory === null && styles.categoryChipSelected
                                             ]}
                                             onPress={() => setSelectedCategory(null)}
                                         >
+                                            <Ionicons 
+                                                name="apps" 
+                                                size={16} 
+                                                color={selectedCategory === null ? "#fff" : "#555"} 
+                                            />
                                             <Text style={[
                                                 styles.categoryChipText,
                                                 selectedCategory === null && styles.categoryChipTextSelected
@@ -639,7 +659,7 @@ const WallpaperHomeScreen = () => {
                                         
                                         {categories.map(category => (
                                             <TouchableOpacity
-                                                key={category.id}
+                                                key={`category-${category.id}`}
                                                 style={[
                                                     styles.categoryChip,
                                                     selectedCategory === category.id && styles.categoryChipSelected
@@ -657,15 +677,26 @@ const WallpaperHomeScreen = () => {
                                 
                                 {/* Premium Filtresi */}
                                 <View style={styles.filterSection}>
-                                    <Text style={styles.filterSectionTitle}>Duvar Kağıdı Türü</Text>
+                                    <View style={styles.filterSectionHeader}>
+                                        <View style={styles.filterTitleContainer}>
+                                            <FontAwesome5 name="crown" size={16} color="#f1c40f" />
+                                            <Text style={styles.filterSectionTitle}>Duvar Kağıdı Türü</Text>
+                                        </View>
+                                    </View>
                                     <View style={styles.premiumFilterContainer}>
                                         <TouchableOpacity
+                                            key={`premium-all-${Date.now()}`}
                                             style={[
                                                 styles.premiumFilterButton,
                                                 isPremiumFilter === null && styles.premiumFilterButtonSelected
                                             ]}
                                             onPress={() => setIsPremiumFilter(null)}
                                         >
+                                            <Ionicons 
+                                                name="albums-outline" 
+                                                size={16} 
+                                                color={isPremiumFilter === null ? "#fff" : "#555"} 
+                                            />
                                             <Text style={[
                                                 styles.premiumFilterButtonText,
                                                 isPremiumFilter === null && styles.premiumFilterButtonTextSelected
@@ -673,12 +704,18 @@ const WallpaperHomeScreen = () => {
                                         </TouchableOpacity>
                                         
                                         <TouchableOpacity
+                                            key={`premium-free-${Date.now()}`}
                                             style={[
                                                 styles.premiumFilterButton,
                                                 isPremiumFilter === 0 && styles.premiumFilterButtonSelected
                                             ]}
                                             onPress={() => setIsPremiumFilter(0)}
                                         >
+                                            <Ionicons 
+                                                name="image-outline" 
+                                                size={16} 
+                                                color={isPremiumFilter === 0 ? "#fff" : "#555"} 
+                                            />
                                             <Text style={[
                                                 styles.premiumFilterButtonText,
                                                 isPremiumFilter === 0 && styles.premiumFilterButtonTextSelected
@@ -686,13 +723,18 @@ const WallpaperHomeScreen = () => {
                                         </TouchableOpacity>
                                         
                                         <TouchableOpacity
+                                            key={`premium-paid-${Date.now()}`}
                                             style={[
                                                 styles.premiumFilterButton,
                                                 isPremiumFilter === 1 && styles.premiumFilterButtonSelected
                                             ]}
                                             onPress={() => setIsPremiumFilter(1)}
                                         >
-                                            <FontAwesome5 name="crown" size={12} color={isPremiumFilter === 1 ? "#fff" : "#f1c40f"} />
+                                            <FontAwesome5 
+                                                name="crown" 
+                                                size={14} 
+                                                color={isPremiumFilter === 1 ? "#fff" : "#f1c40f"} 
+                                            />
                                             <Text style={[
                                                 styles.premiumFilterButtonText,
                                                 isPremiumFilter === 1 && styles.premiumFilterButtonTextSelected
@@ -703,15 +745,26 @@ const WallpaperHomeScreen = () => {
                                 
                                 {/* Sıralama */}
                                 <View style={styles.filterSection}>
-                                    <Text style={styles.filterSectionTitle}>Sıralama</Text>
-                                    <View style={styles.sortOptionsContainer}>
+                                    <View style={styles.filterSectionHeader}>
+                                        <View style={styles.filterTitleContainer}>
+                                            <MaterialIcons name="sort" size={20} color="#4285F4" />
+                                            <Text style={styles.filterSectionTitle}>Sıralama</Text>
+                                        </View>
+                                    </View>
+                                    <View style={styles.sortOptionsGrid}>
                                         <TouchableOpacity
+                                            key={`sort-created-at-${Date.now()}`}
                                             style={[
                                                 styles.sortOptionButton,
                                                 sortBy === 'created_at' && styles.sortOptionButtonSelected
                                             ]}
                                             onPress={() => setSortBy('created_at')}
                                         >
+                                            <Ionicons 
+                                                name="calendar-outline" 
+                                                size={18} 
+                                                color={sortBy === 'created_at' ? "#fff" : "#555"} 
+                                            />
                                             <Text style={[
                                                 styles.sortOptionButtonText,
                                                 sortBy === 'created_at' && styles.sortOptionButtonTextSelected
@@ -719,12 +772,18 @@ const WallpaperHomeScreen = () => {
                                         </TouchableOpacity>
                                         
                                         <TouchableOpacity
+                                            key={`sort-views-${Date.now()}`}
                                             style={[
                                                 styles.sortOptionButton,
                                                 sortBy === 'views' && styles.sortOptionButtonSelected
                                             ]}
                                             onPress={() => setSortBy('views')}
                                         >
+                                            <Ionicons 
+                                                name="eye-outline" 
+                                                size={18} 
+                                                color={sortBy === 'views' ? "#fff" : "#555"} 
+                                            />
                                             <Text style={[
                                                 styles.sortOptionButtonText,
                                                 sortBy === 'views' && styles.sortOptionButtonTextSelected
@@ -732,12 +791,18 @@ const WallpaperHomeScreen = () => {
                                         </TouchableOpacity>
                                         
                                         <TouchableOpacity
+                                            key={`sort-downloads-${Date.now()}`}
                                             style={[
                                                 styles.sortOptionButton,
                                                 sortBy === 'downloads' && styles.sortOptionButtonSelected
                                             ]}
                                             onPress={() => setSortBy('downloads')}
                                         >
+                                            <Ionicons 
+                                                name="download-outline" 
+                                                size={18} 
+                                                color={sortBy === 'downloads' ? "#fff" : "#555"} 
+                                            />
                                             <Text style={[
                                                 styles.sortOptionButtonText,
                                                 sortBy === 'downloads' && styles.sortOptionButtonTextSelected
@@ -745,12 +810,18 @@ const WallpaperHomeScreen = () => {
                                         </TouchableOpacity>
                                         
                                         <TouchableOpacity
+                                            key={`sort-likes-${Date.now()}`}
                                             style={[
                                                 styles.sortOptionButton,
                                                 sortBy === 'likes' && styles.sortOptionButtonSelected
                                             ]}
                                             onPress={() => setSortBy('likes')}
                                         >
+                                            <Ionicons 
+                                                name="thumbs-up-outline" 
+                                                size={18} 
+                                                color={sortBy === 'likes' ? "#fff" : "#555"} 
+                                            />
                                             <Text style={[
                                                 styles.sortOptionButtonText,
                                                 sortBy === 'likes' && styles.sortOptionButtonTextSelected
@@ -771,7 +842,7 @@ const WallpaperHomeScreen = () => {
                                                 <MaterialIcons 
                                                     name={sortDirection === 'desc' ? 'arrow-downward' : 'arrow-upward'} 
                                                     size={16} 
-                                                    color="#333" 
+                                                    color="#4285F4" 
                                                 />
                                             </TouchableOpacity>
                                         </View>
@@ -784,6 +855,7 @@ const WallpaperHomeScreen = () => {
                                     style={styles.resetFiltersButton}
                                     onPress={resetFilters}
                                 >
+                                    <Ionicons name="refresh-outline" size={18} color="#333" style={{marginRight: 8}} />
                                     <Text style={styles.resetFiltersButtonText}>Sıfırla</Text>
                                 </TouchableOpacity>
                                 
@@ -791,6 +863,7 @@ const WallpaperHomeScreen = () => {
                                     style={styles.applyFiltersButton}
                                     onPress={applyFilters}
                                 >
+                                    <MaterialIcons name="done" size={18} color="#fff" style={{marginRight: 8}} />
                                     <Text style={styles.applyFiltersButtonText}>Uygula</Text>
                                 </TouchableOpacity>
                             </View>
@@ -839,8 +912,9 @@ const styles = StyleSheet.create({
         height: 45,
     },
     headerBanner: {
-        height: 100,
+        height: 140,
         position: 'relative',
+        width: '100%',
     },
     headerImage: {
         width: '100%',
@@ -848,20 +922,44 @@ const styles = StyleSheet.create({
         position: 'absolute',
     },
     headerOverlay: {
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        padding: 20,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        padding: 15,
         height: '100%',
         justifyContent: 'center',
+        paddingTop: StatusBar.currentHeight || 0, // Status bar yüksekliğini hesaba kat
+    },
+    headerContent: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+    },
+    HeaderText: {
+        color: '#fff',
+        fontSize: 24,
+        fontWeight: 'bold',
+        fontFamily: 'Montserrat-Bold',
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 4,
+        textAlign: 'center',
+    },
+    backButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+        top: StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 20,
+        left: 15,
+        zIndex: 10,
     },
     buttonContent: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    HeaderText: {
-        color: '#fff',
-        fontSize: 22,
-        fontWeight: 'bold',
     },
     searchIcon: {
         marginRight: 10,
@@ -964,10 +1062,13 @@ const styles = StyleSheet.create({
     },
     statsContainer: {
         flexDirection: 'row',
+        display: 'flex',
+        flexWrap: 'wrap',
         justifyContent: 'space-between',
     },
     statItem: {
         flexDirection: 'row',
+        width: '48%',
         alignItems: 'center',
     },
     statText: {
@@ -1040,15 +1141,23 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 20,
         overflow: 'hidden',
         zIndex: 1001,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: -4,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 20,
     },
     bottomSheetContent: {
         flex: 1,
         padding: 20,
     },
     bottomSheetHandle: {
-        width: 40,
+        width: 50,
         height: 5,
-        backgroundColor: '#ddd',
+        backgroundColor: '#e0e0e0',
         borderRadius: 2.5,
         alignSelf: 'center',
         marginBottom: 20,
@@ -1058,84 +1167,159 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: 20,
+        paddingBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f5f5f5',
     },
     bottomSheetTitle: {
-        fontSize: 18,
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#333',
+        fontFamily: 'Montserrat-Bold',
     },
     filterScrollContent: {
         marginBottom: 20,
     },
     filterSection: {
-        marginBottom: 20,
+        marginBottom: 25,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 15,
+        padding: 15,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+        elevation: 3,
+    },
+    filterSectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    filterTitleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     filterSectionTitle: {
         color: '#333',
         fontSize: 16,
         fontFamily: 'Montserrat-Bold',
-        marginBottom: 10,
+        marginLeft: 10,
     },
     categoriesScroll: {
         flexDirection: 'row',
     },
     categoryChip: {
+        flexDirection: 'row',
+        alignItems: 'center',
         padding: 10,
         backgroundColor: '#fff',
         borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 5,
-        marginRight: 5,
+        borderColor: '#eee',
+        borderRadius: 10,
+        marginRight: 10,
+        marginVertical: 5,
+        minWidth: 80,
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     categoryChipSelected: {
-        backgroundColor: '#ff4757',
+        backgroundColor: '#4285F4',
+        borderColor: '#4285F4',
     },
     categoryChipText: {
-        color: '#333',
-        fontSize: 12,
+        color: '#555',
+        fontSize: 13,
+        fontFamily: 'Montserrat-Medium',
+        marginLeft: 5,
     },
     categoryChipTextSelected: {
         color: '#fff',
     },
     premiumFilterContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         alignItems: 'center',
+        flexWrap: 'wrap',
     },
     premiumFilterButton: {
-        padding: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
         backgroundColor: '#fff',
         borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 5,
+        borderColor: '#eee',
+        borderRadius: 10,
+        margin: 5,
+        minWidth: 100,
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     premiumFilterButtonSelected: {
-        backgroundColor: '#ff4757',
+        backgroundColor: '#4285F4',
+        borderColor: '#4285F4',
     },
     premiumFilterButtonText: {
-        color: '#333',
-        fontSize: 12,
+        color: '#555',
+        fontSize: 13,
+        fontFamily: 'Montserrat-Medium',
+        marginLeft: 6,
     },
     premiumFilterButtonTextSelected: {
         color: '#fff',
     },
-    sortOptionsContainer: {
+    sortOptionsGrid: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         justifyContent: 'space-between',
     },
     sortOptionButton: {
-        padding: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
         backgroundColor: '#fff',
         borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 5,
+        borderColor: '#eee',
+        borderRadius: 10,
+        marginBottom: 10,
+        width: '48%',
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     sortOptionButtonSelected: {
-        backgroundColor: '#ff4757',
+        backgroundColor: '#4285F4',
+        borderColor: '#4285F4',
     },
     sortOptionButtonText: {
-        color: '#333',
-        fontSize: 12,
+        color: '#555',
+        fontSize: 13,
+        fontFamily: 'Montserrat-Medium',
+        marginLeft: 6,
     },
     sortOptionButtonTextSelected: {
         color: '#fff',
@@ -1143,19 +1327,32 @@ const styles = StyleSheet.create({
     sortDirectionContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'flex-end',
+        marginTop: 10,
+        backgroundColor: '#f0f7ff',
+        borderRadius: 15,
+        padding: 10,
     },
     sortDirectionLabel: {
         color: '#333',
-        fontSize: 12,
+        fontSize: 13,
+        fontFamily: 'Montserrat-Medium',
         marginRight: 10,
     },
     sortDirectionButton: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
     },
     sortDirectionButtonText: {
         color: '#333',
         fontSize: 12,
+        fontFamily: 'Montserrat-Medium',
         marginRight: 5,
     },
     bottomSheetButtons: {
@@ -1164,8 +1361,11 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         borderTopWidth: 1,
         borderTopColor: '#f0f0f0',
+        marginTop: 10,
     },
     resetFiltersButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingVertical: 12,
         paddingHorizontal: 25,
         backgroundColor: '#f0f0f0',
@@ -1175,17 +1375,29 @@ const styles = StyleSheet.create({
         color: '#333',
         fontSize: 14,
         fontWeight: '500',
+        fontFamily: 'Montserrat-Medium',
     },
     applyFiltersButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingVertical: 12,
         paddingHorizontal: 25,
         backgroundColor: '#4285F4',
         borderRadius: 25,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
     },
     applyFiltersButtonText: {
         color: '#fff',
         fontSize: 14,
         fontWeight: '500',
+        fontFamily: 'Montserrat-Medium',
     },
     emptyContainer: {
         flex: 1,
@@ -1201,6 +1413,44 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: 'Montserrat-Medium',
         textAlign: 'center',
+    },
+    closeButton: {
+        width: 34,
+        height: 34,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ff4757',
+        borderRadius: 17,
+    },
+    premiumBadge: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        backgroundColor: '#f1c40f',
+        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        zIndex: 10,
+    },
+    premiumText: {
+        color: '#fff',
+        fontSize: 10,
+        fontWeight: 'bold',
+        marginLeft: 3,
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 2,
     },
 });
 

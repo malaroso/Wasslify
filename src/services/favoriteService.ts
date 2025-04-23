@@ -4,7 +4,7 @@ import { WallpaperResponse } from '../types/WallpaperTypes';
 export const getFavorites = async (): Promise<WallpaperResponse> => {
     try {
         const response = await axiosInstance.get('/getFavorites');
-        console.log('getFavorites Raw API Response:', response.data);
+        console.log('getFavorites Raw API Response:');
         
         if (response.data && response.data.status && Array.isArray(response.data.data)) {
             return response.data;
@@ -12,33 +12,27 @@ export const getFavorites = async (): Promise<WallpaperResponse> => {
         
         return {
             status: false,
-            data: {
-                status: false,
-                data: [],
-                pagination: {
-                    current_page: 1,
-                    per_page: 10,
-                    total: 0,
-                    total_pages: 0
-                }
-            },
-            message: 'Favoriler bulunamadı'
+            message: 'Favoriler bulunamadı',
+            data: [],
+            pagination: {
+                current_page: 1,
+                per_page: 10,
+                total: 0,
+                total_pages: 0
+            }
         };
     } catch (error) {
         console.error('Favoriler yüklenirken hata oluştu:', error);
         return {
             status: false,
-            data: {
-                status: false,
-                data: [],
-                pagination: {
-                    current_page: 1,
-                    per_page: 10,
-                    total: 0,
-                    total_pages: 0
-                }
-            },
-            message: 'Favoriler yüklenirken bir hata oluştu'
+            message: 'Favoriler yüklenirken bir hata oluştu',
+            data: [],
+            pagination: {
+                current_page: 1,
+                per_page: 10,
+                total: 0,
+                total_pages: 0
+            }
         };
     }
 };
@@ -49,7 +43,7 @@ export const addFavorite = async (wallpaperId: number): Promise<{ status: boolea
             wallpaper_id: wallpaperId
         });
         
-        console.log('addFavorite Raw API Response:', response.data);
+        console.log('addFavorite Raw API Response:');
         
         if (response.data && response.data.status) {
             return {
@@ -90,7 +84,7 @@ export const removeFavorite = async (wallpaperId: number): Promise<{ status: boo
             wallpaper_id: wallpaperId
         });
         
-        console.log('removeFavorite Raw API Response:', response.data);
+        console.log('removeFavorite Raw API Response:');
         
         if (response.data && response.data.status) {
             return {

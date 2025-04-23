@@ -9,7 +9,7 @@ export const getAllCategories = async (): Promise<CategoryResponse> => {
     try {
         const response = await axiosInstance.get('/getAllCategories');
         
-        console.log('Kategoriler başarıyla yüklendi:', response.data);
+        console.log('Kategoriler başarıyla yüklendi:');
         
         return response.data;
     } catch (error) {

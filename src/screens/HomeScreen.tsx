@@ -50,7 +50,7 @@ const HomeScreen = () => {
             setLoadingPopular(true);
             const response = await getPopularWallpapers();
             if (response.status) {
-                console.log('Popular Wallpapers Data:', response.data);
+                console.log('Popular Wallpapers Data başarıyla yüklendi');
                 setPopularWallpapers(response.data);
             } else {
                 console.error('API Error:', response.message);
@@ -174,6 +174,7 @@ const HomeScreen = () => {
                 source={{ uri: wallpaper.image_url }} 
                 style={styles.wallpaperImage} 
             />
+
             <View style={styles.wallpaperActions}> 
                 <TouchableOpacity 
                     style={styles.actionButton}
@@ -204,23 +205,23 @@ const HomeScreen = () => {
                 </TouchableOpacity>
             </View>
             <View style={styles.wallpaperOverlay}>
-                <Text style={styles.wallpaperTitle}>{wallpaper.title}</Text>
+                <Text style={styles.wallpaperTitle} numberOfLines={1} ellipsizeMode="tail">{wallpaper.title}</Text>
                 <View style={styles.wallpaperStats}>
                     <View style={styles.statItem}>
-                        <Ionicons name="eye" size={12} color="#fff" />
-                        <Text style={styles.statText}>{wallpaper.views}</Text>
+                        <FontAwesome5 name="eye" size={12} color="#fff" />
+                        <Text style={styles.statText}>{wallpaper.views || 0}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <FontAwesome5 name="thumbs-up" size={12} color="#fff" />
-                        <Text style={styles.statText}>{wallpaper.likes_count}</Text>
+                        <Text style={styles.statText}>{wallpaper.likes_count || 0}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <FontAwesome5 name="comment" size={12} color="#fff" />
-                        <Text style={styles.statText}>{wallpaper.comments_count}</Text>
+                        <Text style={styles.statText}>{wallpaper.comments_count || 0}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <Ionicons name="download" size={12} color="#fff" />
-                        <Text style={styles.statText}>{wallpaper.downloads}</Text>
+                        <Text style={styles.statText}>{wallpaper.downloads || 0}</Text>
                     </View>
                 </View>
             </View>
@@ -243,7 +244,7 @@ const HomeScreen = () => {
                             loop 
                             style={{ width: '70%', height: 100 }}
                         />
-                        <Text style={styles.premiumText}>GET PREMIUM TODAY</Text>
+                        <Text style={styles.premiumCardText}>GET PREMIUM TODAY</Text>
                         <Text style={styles.premiumSubText}>{userDetail?.username} Get discount for premium membership and access to all wallpapers 🚀</Text>
                     </TouchableOpacity>
                     <View style={styles.divider} />
@@ -417,6 +418,27 @@ const styles = StyleSheet.create({
     menuItems: {
         padding: 15,
     },
+    itemOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: 10,
+    },
+    itemTitle: {
+        color: '#fff',
+        fontSize: 14,
+        fontFamily: 'Montserrat-Medium',
+        marginBottom: 5,
+    },
+    statsContainer: {
+        flexDirection: 'row',
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+    
     premiumContainer: {
         alignItems: 'center',
         marginBottom: 20,
@@ -607,10 +629,13 @@ const styles = StyleSheet.create({
     },
     wallpaperStats: {
         flexDirection: 'row',
+        display: 'flex',
+        flexWrap: 'wrap',
         justifyContent: 'space-between',
     },
     statItem: {
         flexDirection: 'row',
+        width: '48%',
         alignItems: 'center',
     },
     statText: {
@@ -690,6 +715,41 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    premiumBadge: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        backgroundColor: '#f1c40f',
+        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        zIndex: 10,
+    },
+    badgeText: {
+        color: '#fff',
+        fontSize: 10,
+        fontWeight: 'bold',
+        marginLeft: 3,
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 2,
+    },
+    premiumCardText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: -10,
     },
 });
 

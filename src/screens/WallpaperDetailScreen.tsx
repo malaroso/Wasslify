@@ -436,12 +436,12 @@ const styles = StyleSheet.create({
     },
     header: {
         position: 'absolute',
-        top: 15,
+        top: 60,
         left: 0,
         right: 0,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 20,
+        padding: 10,
         zIndex: 10,
     },
     backButton: {
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
     },
     premiumBadge: {
         position: 'absolute',
-        top: 70,
+        top: 110,
         right: 20,
         backgroundColor: '#f1c40f',
         borderRadius: 10,

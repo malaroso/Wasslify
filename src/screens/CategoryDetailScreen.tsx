@@ -43,7 +43,7 @@ const CategoryDetailScreen = () => {
         try {
             setLoading(true);
             const response = await getWallpapersByCategory(categoryId, page);
-            console.log('API Response:', response); // Debug için
+            console.log('Kategori detayı fetchWallpapers methodu'); // Debug için
 
             if (response.status && Array.isArray(response.data)) {
                 const newWallpapers = response.data;

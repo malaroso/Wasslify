@@ -11,7 +11,7 @@ export const getAllWallpapers = async (page: number = 1, limit: number = 10): Pr
             }
         });
         
-        console.log('getAllWallpapers API Response:', response.data); // Debug log
+        console.log('getAllWallpapers Başarıyla Yüklendi:'); // Debug log
         
         // API yanıtını direkt olarak döndürüyoruz
         return response.data;
@@ -37,7 +37,7 @@ export const getAllWallpapers = async (page: number = 1, limit: number = 10): Pr
 export const getPopularWallpapers = async (): Promise<WallpaperResponse> => {
     try {
         const response = await axiosInstance.get('/getPopularWallpapers');
-        console.log('getPopularWallpapers Raw API Response:', response.data);
+        console.log('getPopularWallpapers Raw API Response:');
         
         // API yanıtını direkt olarak döndürüyoruz
         return response.data;
@@ -66,7 +66,7 @@ export const likeWallpaper = async (wallpaperId: number): Promise<{ status: bool
             wallpaper_id: wallpaperId
         });
         
-        console.log('likeWallpaper Raw API Response:', response.data);
+        console.log('likeWallpaper Raw API Response:');
         
         if (response.data && response.data.status) {
             return {
@@ -94,7 +94,7 @@ export const unlikeWallpaper = async (wallpaperId: number): Promise<{ status: bo
             wallpaper_id: wallpaperId
         });
         
-        console.log('unlikeWallpaper Raw API Response:', response.data);
+        console.log('unlikeWallpaper Raw API Response:');
         
         if (response.data && response.data.status) {
             return {
@@ -125,7 +125,7 @@ export const getWallpapersByCategory = async (categoryId: number, page: number =
             }
         });
         
-        console.log(`getWallpapersByCategory/${categoryId} API Response:`, response.data);
+        console.log(`getWallpapersByCategory/${categoryId} API Response:`);
         
         // API yanıtını direkt olarak döndürüyoruz
         return response.data;
@@ -153,7 +153,7 @@ export const getWallpaperById = async (wallpaperId: number): Promise<{
     try {
         const response = await axiosInstance.get(`/getWallpaperById/${wallpaperId}`);
         
-        console.log(`getWallpaperById/${wallpaperId} API Response:`, response.data);
+        console.log(`getWallpaperById/${wallpaperId} API Response:`);
         
         // API yanıtını direkt olarak döndürüyoruz
         return response.data;
@@ -174,7 +174,7 @@ export const getCommentsByWallpaper = async (wallpaperId: number): Promise<{
     try {
         const response = await axiosInstance.get(`/getCommentsByWallpaper/${wallpaperId}`);
         
-        console.log(`getCommentsByWallpaper/${wallpaperId} API Response:`, response.data);
+        console.log(`getCommentsByWallpaper/${wallpaperId} API Response:`);
         
         // API yanıtını direkt olarak döndürüyoruz
         return response.data;
@@ -197,7 +197,7 @@ export const addComment = async (wallpaperId: number, comment: string): Promise<
             wallpaper_id: wallpaperId,
             comment: comment
         });
-        console.log('addComment API Response:', response.data);
+        console.log('addComment API Response:');
         return response.data;
     } catch (error) {
         console.error('Yorum eklenirken hata oluştu:', error);
@@ -216,7 +216,7 @@ export const deleteComment = async (commentId: number): Promise<{
         const response = await axiosInstance.post('/deleteComment', {
             comment_id: commentId
         });
-        console.log('deleteComment API Response:', response.data);
+        console.log('deleteComment API Response:');
         return response.data;
     } catch (error) {
         console.error('Yorum silinirken hata oluştu:', error);
@@ -238,11 +238,25 @@ export const searchWallpapers = async (params: {
     limit?: number;
 }): Promise<WallpaperResponse> => {
     try {
+        // İstek URL'ini konsola yazdırma
+        console.log('Arama parametreleri:', params);
+        const queryParams = new URLSearchParams();
+        
+        // Parametreleri URL'e ekleme
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                queryParams.append(key, value.toString());
+            }
+        });
+        
+        // Oluşturulan URL'i konsola yazdırma
+        console.log('Arama İstek URL:', `/searchWallpapers?${queryParams.toString()}`);
+        
         const response = await axiosInstance.get('/searchWallpapers', {
             params
         });
         
-        console.log('searchWallpapers API Response:', response.data);
+        console.log('searchWallpapers API Response:');
         
         // API yanıtını döndürüyoruz
         return response.data;
