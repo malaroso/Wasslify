@@ -51,14 +51,7 @@ const HomeScreen = () => {
             const response = await getPopularWallpapers();
             if (response.status) {
                 console.log('Popular Wallpapers Data:', response.data);
-                if (response.data && Array.isArray(response.data)) {
-                    setPopularWallpapers(response.data);
-                } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
-                    setPopularWallpapers(response.data.data);
-                } else {
-                    console.error('Invalid API response structure:', response);
-                    setPopularWallpapers([]);
-                }
+                setPopularWallpapers(response.data);
             } else {
                 console.error('API Error:', response.message);
                 setPopularWallpapers([]);
@@ -181,10 +174,13 @@ const HomeScreen = () => {
                 source={{ uri: wallpaper.image_url }} 
                 style={styles.wallpaperImage} 
             />
-            <View style={styles.wallpaperActions}>
+            <View style={styles.wallpaperActions}> 
                 <TouchableOpacity 
                     style={styles.actionButton}
-                    onPress={() => handleFavoritePress(wallpaper)}
+                    onPress={(e) => {
+                        e.stopPropagation(); // Prevent navigating to detail page
+                        handleFavoritePress(wallpaper);
+                    }}
                 >
                     <Ionicons 
                         name={wallpaper.is_favorited === 1 ? "heart" : "heart-outline"} 
@@ -194,7 +190,10 @@ const HomeScreen = () => {
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={styles.actionButton}
-                    onPress={() => handleLikePress(wallpaper)}
+                    onPress={(e) => {
+                        e.stopPropagation(); // Prevent navigating to detail page
+                        handleLikePress(wallpaper);
+                    }}
                 >
                     <FontAwesome5 
                         name="thumbs-up" 
@@ -210,6 +209,14 @@ const HomeScreen = () => {
                     <View style={styles.statItem}>
                         <Ionicons name="eye" size={12} color="#fff" />
                         <Text style={styles.statText}>{wallpaper.views}</Text>
+                    </View>
+                    <View style={styles.statItem}>
+                        <FontAwesome5 name="thumbs-up" size={12} color="#fff" />
+                        <Text style={styles.statText}>{wallpaper.likes_count}</Text>
+                    </View>
+                    <View style={styles.statItem}>
+                        <FontAwesome5 name="comment" size={12} color="#fff" />
+                        <Text style={styles.statText}>{wallpaper.comments_count}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <Ionicons name="download" size={12} color="#fff" />
@@ -304,7 +311,7 @@ const HomeScreen = () => {
                         <View style={styles.section}>
                             <View style={styles.sectionHeader}>
                                 <Text style={styles.sectionTitle}>Wallpapers</Text>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={() => navigation.navigate('WallpaperHome')}>
                                     <Text style={styles.moreText}>More</Text>
                                 </TouchableOpacity>
                             </View>
@@ -360,7 +367,10 @@ const HomeScreen = () => {
                                 ) : categories.map(renderCategoryItem)}
                             </View>
                             
-                            <TouchableOpacity style={styles.moreButton}>
+                            <TouchableOpacity 
+                                style={styles.moreButton}
+                                onPress={() => navigation.navigate('WallpaperHome')}
+                            >
                                 <Text style={styles.moreButtonText}>More</Text>
                             </TouchableOpacity>
                         </View>
