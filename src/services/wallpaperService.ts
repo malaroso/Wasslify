@@ -19,17 +19,14 @@ export const getAllWallpapers = async (page: number = 1, limit: number = 10): Pr
         console.error('Duvar kağıtları yüklenirken hata oluştu:', error);
         return {
             status: false,
-            data: {
-                status: false,
-                data: [],
-                pagination: {
-                    current_page: 1,
-                    per_page: 10,
-                    total: 0,
-                    total_pages: 0
-                }
-            },
-            message: 'Duvar kağıtları yüklenirken bir hata oluştu'
+            message: 'Duvar kağıtları yüklenirken bir hata oluştu',
+            data: [],
+            pagination: {
+                current_page: 1,
+                per_page: 10,
+                total: 0,
+                total_pages: 0
+            }
         };
     }
 };
@@ -45,17 +42,14 @@ export const getPopularWallpapers = async (): Promise<WallpaperResponse> => {
         console.error('Popüler duvar kağıtları yüklenirken hata oluştu:', error);
         return {
             status: false,
-            data: {
-                status: false,
-                data: [],
-                pagination: {
-                    current_page: 1,
-                    per_page: 10,
-                    total: 0,
-                    total_pages: 0
-                }
-            },
-            message: 'Popüler duvar kağıtları yüklenirken bir hata oluştu'
+            message: 'Popüler duvar kağıtları yüklenirken bir hata oluştu',
+            data: [],
+            pagination: {
+                current_page: 1,
+                per_page: 10,
+                total: 0,
+                total_pages: 0
+            }
         };
     }
 };
