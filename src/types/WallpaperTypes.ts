@@ -7,6 +7,8 @@ export interface Wallpaper {
     user_id: number | null;
     views: number;
     downloads: number;
+    likes_count: number;
+    comments_count: number;
     is_premium: number;
     created_at: string;
     updated_at: string;
@@ -23,10 +25,16 @@ export interface Pagination {
 
 export interface WallpaperResponse {
     status: boolean;
-    data: {
-        status: boolean;
-        data: Wallpaper[];
-        pagination: Pagination;
-    };
     message: string;
+    data: Wallpaper[];
+    pagination: Pagination;
+}
+
+export interface Comment {
+    id: number;
+    user_id: number;
+    wallpaper_id: number;
+    comment: string;
+    created_at: string;
+    user_name: string;
 } 
